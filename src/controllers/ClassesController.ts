@@ -10,6 +10,21 @@ interface ScheduleItem {
 }
 
 export default class ClassesControler {
+
+    async list (request: Request, response: Response) {
+
+        const classes = await db('classes')
+        .whereExists(function() {
+            this.select('class_schedule.*')
+            .from('class_schedule')
+            .whereRaw('`class_schedule`.`class_id` = `classes`.`id`')
+        })
+        .join('users', 'classes.user_id', '=', 'users.id')
+        .select(['classes.*', 'users.*'])
+
+        return response.json(classes);
+    }
+
     async index (request: Request, response: Response) {
         const filters = request.query;
 
